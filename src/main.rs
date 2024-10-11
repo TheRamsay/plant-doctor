@@ -57,17 +57,20 @@ fn main() {
         Err(e) => log::error!("Ping failed: {:?}", e),
     }
 
-    let (mut mqtt_client, mqtt_connection) = EspMqttClient::new(
+    let mut mqtt_client = EspMqttClient::new_cb(
         "mqtt://192.168.0.83:1883",
         &MqttClientConfiguration {
             network_timeout: Duration::from_secs(5),
             ..Default::default()
         },
+        |event| {
+            log::info!("MQTT Event: {:?}", event.payload());
+        },
     )
     .unwrap();
 
     loop {
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(2000));
         let adc_value = adc.read(&mut adc_pin).unwrap() as i16;
         let percentage = ((DRY_VALUE - adc_value) as f32 / (DRY_VALUE - WET_VALUE) as f32) * 100.0;
         log::info!("ADC Value:{} | Percentage: {}", adc_value, percentage);
