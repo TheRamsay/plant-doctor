@@ -1,0 +1,9 @@
+mqtt:
+    sensor:
+        - name: "Plant Moisture"
+          state_topic: "sensor/soil_moisture"
+          value_template: "{{ value_json.percentage }}"
+          device:
+            name: "Plant Moisture"
+            identifiers:
+              - "plant_moisture"
