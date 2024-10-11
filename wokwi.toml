@@ -1,0 +1,18 @@
+gdbServerPort = 3333
+elf = "target/xtensa-esp32-espidf/debug/plant-doctor"
+firmware = "target/xtensa-esp32-espidf/debug/plant-doctor"
+name = "plant-doctor"
+version = "0.1.0"
+chip = "esp32"
+
+[esp32]
+board = "esp32-devkitv1"
+
+[monitor]
+baud = 115200
+
+[peripherals]
+# Moisture sensor
+[[peripherals.adc]]
+pin = 36
+channel = 0
