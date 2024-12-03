@@ -1,10 +1,15 @@
+use std::rc::Rc;
 use std::str::FromStr;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+
+// use bh1750::BH1750;
 
 use esp_idf_hal::adc::attenuation::DB_11;
 use esp_idf_hal::adc::oneshot::config::AdcChannelConfig;
 use esp_idf_hal::adc::oneshot::*;
+use esp_idf_hal::i2c::I2c;
 use esp_idf_hal::peripheral::Peripheral;
 use esp_idf_hal::peripherals::Peripherals;
 
@@ -15,10 +20,14 @@ use esp_idf_svc::nvs::{EspDefaultNvs, EspDefaultNvsPartition};
 use esp_idf_svc::ping::EspPing;
 use esp_idf_svc::wifi::*;
 use esp_idf_svc::{ipv4, netif::*};
+use publisher::sensor_config::SensorConfig;
+
+use driver::bh1750::BH1750;
 
 const WET_VALUE: i16 = 950;
 const DRY_VALUE: i16 = 2500;
 
+mod driver;
 mod publisher;
 mod sensor;
 
@@ -32,11 +41,9 @@ fn main() {
 
     log::info!("Hello, world!");
 
-    let sensors: Vec<Box<dyn sensor::Sensor>> = vec![];
-
     let peripherals = Peripherals::take().unwrap();
 
-    let adc = AdcDriver::new(peripherals.adc1).unwrap();
+    let adc = Rc::new(AdcDriver::new(peripherals.adc1).unwrap());
 
     let config = AdcChannelConfig {
         attenuation: DB_11,
@@ -44,7 +51,34 @@ fn main() {
         ..Default::default()
     };
 
-    let mut adc_pin = AdcChannelDriver::new(&adc, peripherals.pins.gpio34, &config).unwrap();
+    let adc_pin = AdcChannelDriver::new(adc.clone(), peripherals.pins.gpio34, &config).unwrap();
+
+    let humity_sensor =
+        sensor::soil_humidity_sensor::SoilMoistureSensor::new(adc.clone(), adc_pin, 2000, 10000);
+
+    use esp_idf_hal::i2c;
+
+    let i2c = peripherals.i2c0;
+
+    // let bh1750 = BH1750::new(i2c);
+    // let bh1750 = BH1750::new(peripherals.i2c0, delay, false);
+    // let light_sensor = sensor::light_intensity_sensor::LightIntensitySensor::new(bh1750);
+
+    pub type SensorItem = (Box<dyn sensor::Sensor>, SensorConfig);
+    let mut sensors: Vec<SensorItem> = vec![
+        (
+            Box::new(humity_sensor),
+            SensorConfig {
+                topic: "sensor/soil_moisture".into(),
+            },
+        ),
+        // (
+        //     Box::new(light_sensor),
+        //     SensorConfig {
+        //         topic: "sensor/light_intensity".into(),
+        //     },
+        // ),
+    ];
 
     let wifi = connect_to_wifi("Vodafone-94BC", "HDd7DtMbUJMHL4tU", peripherals.modem).unwrap();
 
@@ -71,24 +105,21 @@ fn main() {
 
     loop {
         thread::sleep(Duration::from_millis(2000));
-        let adc_value = adc.read(&mut adc_pin).unwrap() as i16;
-        let percentage = ((DRY_VALUE - adc_value) as f32 / (DRY_VALUE - WET_VALUE) as f32) * 100.0;
-        log::info!("ADC Value:{} | Percentage: {}", adc_value, percentage);
 
-        let payload = format!(
-            "{{\"adc_value\":{},\"percentage\":{}}}",
-            adc_value, percentage
-        );
+        for (sensor, config) in sensors.iter_mut() {
+            let value = sensor.read();
+            log::info!("Sensor value: {}", value);
 
-        match mqtt_client.publish(
-            "sensor/soil_moisture",
-            QoS::AtMostOnce,
-            false,
-            payload.as_bytes(),
-        ) {
-            Ok(id) => log::info!("Published: {} with id {}", payload, id),
-            Err(e) => log::error!("Error publishing: {:?}", e),
-        };
+            match mqtt_client.publish(
+                config.topic.as_str(),
+                QoS::AtMostOnce,
+                false,
+                format!("{{\"value\": {}}}", value).as_bytes(),
+            ) {
+                Ok(id) => log::info!("Published message with id {}", id),
+                Err(e) => log::error!("Error publishing: {:?}", e),
+            };
+        }
     }
 }
 

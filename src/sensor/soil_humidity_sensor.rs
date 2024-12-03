@@ -8,7 +8,7 @@ use esp_idf_hal::gpio::ADCPin;
 
 use super::Sensor;
 
-pub struct SoilHumiditySensor<'a, A, P>
+pub struct SoilMoistureSensor<'a, A, P>
 where
     A: Borrow<AdcDriver<'a, P::Adc>>,
     P: ADCPin,
@@ -19,7 +19,7 @@ where
     dry_value: i16,
 }
 
-impl<'a, A, P> SoilHumiditySensor<'a, A, P>
+impl<'a, A, P> SoilMoistureSensor<'a, A, P>
 where
     A: Borrow<AdcDriver<'a, P::Adc>>,
     P: ADCPin,
@@ -39,7 +39,7 @@ where
     }
 }
 
-impl<'a, A, P> Sensor for SoilHumiditySensor<'a, A, P>
+impl<'a, A, P> Sensor for SoilMoistureSensor<'a, A, P>
 where
     A: Borrow<AdcDriver<'a, P::Adc>>,
     P: ADCPin,
