@@ -1,9 +1,32 @@
 mqtt:
     sensor:
-        - name: "Plant Moisture"
+        - name: plant_moisture
           state_topic: "sensor/soil_moisture"
-          value_template: "{{ value_json.percentage }}"
+          value_template: "{{ value_json.value}}"
           device:
-            name: "Plant Moisture"
-            identifiers:
-              - "plant_moisture"
+              name: "Plant Moisture"
+              identifiers:
+                  - "plant_moisture"
+
+    sensor:
+        - name: light_intensity
+          state_topic: "sensor/light_intensity"
+          value_template: "{{ value_json.value}}"
+          device:
+              name: "Light Intensity"
+              identifiers:
+                  - "light_intensity"
+  
+
+history:
+    include:
+        entities:
+            - sensor.plant_moisture
+            - sensor.light_intensity
+
+recorder:
+    include:
+        entities:
+            - sensor.plant_moisture
+            - sensor.light_intensity
+            
