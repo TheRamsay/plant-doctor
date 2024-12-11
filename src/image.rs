@@ -1,10 +1,4 @@
-use embedded_graphics::{
-    pixelcolor::{BinaryColor, Rgb565},
-    prelude::*,
-    primitives::Rectangle,
-};
-use epd_waveshare::color::Color;
-use image::{DynamicImage, GenericImageView, ImageFormat};
+use image::DynamicImage;
 
 pub fn load_and_process_image(
     file_path: &str,

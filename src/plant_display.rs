@@ -1,10 +1,7 @@
 use embedded_graphics::{
     image::{Image, ImageRaw},
     mono_font::MonoTextStyleBuilder,
-    pixelcolor::{
-        raw::{BigEndian, RawU1},
-        BinaryColor,
-    },
+    pixelcolor::{raw::BigEndian, BinaryColor},
     prelude::Point,
     text::{Text, TextStyleBuilder},
 };
@@ -19,16 +16,13 @@ use epd_waveshare::{
     prelude::WaveshareDisplay,
 };
 
-use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyle},
-    pixelcolor::Rgb565,
-    prelude::*,
-};
+use embedded_graphics::prelude::*;
 
 pub struct DisplayInput {
     pub plant_name: String,
     pub soil_moisture: f32,
     pub light_intensity: f32,
+    // Currently not used :/
     // pub air_temperature: f32,
     // pub air_humidity: f32,
 }
@@ -99,6 +93,15 @@ where
             .draw(&mut self.display);
     }
 
+    pub fn clear(&mut self) {
+        self.display.clear(Color::White).unwrap();
+    }
+
+    pub fn Black(&mut self) {
+        self.display.clear(Color::Black).unwrap();
+    }
+
+    // TODO: Implement this
     pub fn display_image<T>(&mut self, binary_image: &[u8], width: u32, height: u32) {
         let x = Image::new(
             &ImageRaw::<BinaryColor, BigEndian>::new(binary_image, width),

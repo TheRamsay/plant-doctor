@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use serde::Deserialize;
 
 const CONFIG_FILE: &str = "config.toml";
@@ -8,7 +6,7 @@ const CONFIG_FILE: &str = "config.toml";
 pub struct AppConfig {
     pub wifi: WifiConfig,
     pub home_assistant: HomeAssistantConfig,
-    pub gpio_pins: GpioPinsConfig,
+    pub plant_display: PlantDisplayConfig,
 }
 
 #[derive(Deserialize)]
@@ -23,11 +21,8 @@ pub struct HomeAssistantConfig {
 }
 
 #[derive(Deserialize)]
-pub struct GpioPinsConfig {
-    pub bh1750_sda: u8,
-    pub bh1750_scl: u8,
-    pub dht22: u8,
-    pub moisture_adc: u8,
+pub struct PlantDisplayConfig {
+    pub plant_name: String,
 }
 
 pub fn load_config() -> Result<AppConfig, String> {
@@ -39,11 +34,8 @@ pub fn load_config() -> Result<AppConfig, String> {
         home_assistant: HomeAssistantConfig {
             url: "mqtt://192.168.0.83:1883".into(),
         },
-        gpio_pins: GpioPinsConfig {
-            dht22: 4,
-            bh1750_sda: 5,
-            bh1750_scl: 6,
-            moisture_adc: 34,
+        plant_display: PlantDisplayConfig {
+            plant_name: "Vilem zahradni".into(),
         },
     })
 }

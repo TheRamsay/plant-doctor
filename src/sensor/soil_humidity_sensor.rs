@@ -61,25 +61,3 @@ where
         vec![percentage]
     }
 }
-
-pub fn init_sensor<'a, P, A>(
-    peripherals: Peripherals,
-    app_config: AppConfig,
-) -> Result<SoilMoistureSensor<'a, Rc<AdcDriver<'a, ADC1>>, Gpio34>, String>
-where
-    P: ADCPin<Adc = ADC1> + Pin,
-{
-    let adc = Rc::new(AdcDriver::new(peripherals.adc1).unwrap());
-
-    let config = AdcChannelConfig {
-        attenuation: DB_11,
-        calibration: true,
-        ..Default::default()
-    };
-
-    let adc_pin = AdcChannelDriver::new(adc.clone(), peripherals.pins.gpio34, &config).unwrap();
-
-    let humidity_sensor = SoilMoistureSensor::new(adc, adc_pin, 2000, 10000);
-
-    Ok(humidity_sensor)
-}

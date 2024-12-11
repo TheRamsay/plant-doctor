@@ -3,12 +3,9 @@ use std::thread;
 use std::time::Duration;
 
 use esp_idf_hal::peripheral::Peripheral;
-use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_hal::sys::EspError;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
-use esp_idf_svc::mqtt::client::{EspMqttClient, MqttClientConfiguration, QoS};
-use esp_idf_svc::nvs::{EspDefaultNvs, EspDefaultNvsPartition};
-use esp_idf_svc::ping::EspPing;
+use esp_idf_svc::nvs::EspDefaultNvsPartition;
 use esp_idf_svc::wifi::*;
 
 pub fn connect_to_wifi<'a>(
@@ -23,7 +20,6 @@ pub fn connect_to_wifi<'a>(
     log::info!("Creating Wi-Fi instance");
     let mut wifi = EspWifi::new(modem, sysloop, Some(nvs))?;
 
-    // TODO: fix this magic 😭😭
     log::info!("Setting Wi-Fi configuration");
     wifi.set_configuration(&Configuration::Client(ClientConfiguration {
         ssid: heapless::String::from_str(ssid)

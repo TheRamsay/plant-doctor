@@ -1,5 +1,5 @@
 use esp_idf_hal::sys::EspError;
-use esp_idf_svc::mqtt::client::{EspMqttClient, MqttClientConfiguration, QoS};
+use esp_idf_svc::mqtt::client::{EspMqttClient, QoS};
 
 trait Publisher {
     fn publish(&mut self, payload: String) -> Result<(), EspError>;

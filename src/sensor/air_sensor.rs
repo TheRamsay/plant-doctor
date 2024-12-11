@@ -3,11 +3,6 @@ use embedded_hal::{
     delay::DelayNs,
     digital::{InputPin, OutputPin},
 };
-use esp_idf_hal::{
-    delay::Delay,
-    gpio::{AnyIOPin, Input, Output, PinDriver},
-    prelude::Peripherals,
-};
 
 use super::Sensor;
 
